@@ -4,6 +4,9 @@
   "main": "index.js",
   "author": "Michal Irzylowski",
   "license": "MIT",
+  "scripts": {
+    "start": "node index"
+  },
   "dependencies": {
     "bcrypt": "^3.0.0",
     "body-parser": "^1.18.3",
