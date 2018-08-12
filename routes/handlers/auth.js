@@ -5,6 +5,8 @@ exports.register = async function (req, res, next) {
   try {
     //create a user
     let user = await db.User.create(req.body);
+    user.following.push(user.id);
+    await user.save();
     let {id, username, profileImgUrl, description, pictures, following} = user;
       //TOKEN - first we put some payload data (in object) like id, username and proflile img, than we put our secret key
     let token = jwt.sign({
@@ -22,7 +24,8 @@ exports.register = async function (req, res, next) {
       profileImgUrl,
       token,
       description,
-      pictures
+      pictures,
+      following
     });
   } catch (err) {
     //if validation fails
@@ -42,7 +45,12 @@ exports.login = async function (req, res, next) {
   try {
     let user = await db.User.findOne({
     email: req.body.email
-  }).populate('pictures');
+  }).populate('pictures')
+    .populate('following', {
+      username: true,
+      profileImgUrl: true,
+      pictures: true
+    });
     let {id, username, profileImgUrl, pictures, description, following} = user;
     let isMatch = await user.comparePassword(req.body.password);
     if (isMatch) {

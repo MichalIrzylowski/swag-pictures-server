@@ -1,6 +1,8 @@
 const express = require('express');
 const multer = require('multer');
-const db = require('../models')
+const mongoose = require('mongoose');
+const db = require('../models');
+
 const storage = multer.diskStorage({
   filename: function(req, file, callback) {
     callback(null, Date.now() + file.originalname);
@@ -24,15 +26,16 @@ cloudinary.config({
 
 const router = express.Router();
 
-router.get('/getAllPictures', async function (req, res, next) {
+router.post('/getPictures', async function (req, res, next) {
   try {
-    let pictures = await db.Picture.find().sort({createdAt: 'desc'}).populate('author', {
+    let picturesIds = req.body.map( p => new mongoose.Types.ObjectId(p));
+    let pictures = await db.Picture.find({_id: {$in: picturesIds}}).sort({createdAt: 'desc'}).populate('author', {
       username: true,
       profileImgUrl: true
-    });
-    return res.status(200).json(pictures);
+    })
+    return res.status(200).json(pictures)
   } catch (e) {
-    return next(e);
+    return next (e);
   }
 });
 
@@ -51,7 +54,9 @@ router.post('/follow_user', async function(req, res, next) {
     const foundUser = await db.User.findById(follower_id);
     foundUser.following.push(tryingToFollowUser_id);
     await foundUser.save();
-    return res.status(200).json(tryingToFollowUser_id);
+    const foundFollowingUser = await db.User.findById(tryingToFollowUser_id);
+    const {_id, username, profileImgUrl, pictures} = foundFollowingUser;
+    return res.status(200).json({_id, username, profileImgUrl, pictures});
   } catch (e) {
     return next(e);
   }
