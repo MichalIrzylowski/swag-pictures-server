@@ -7,7 +7,7 @@ const auth = require('./routes/auth'),
       pictures = require('./routes/pictures'),
       errorHandler = require('./handlers');
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 

@@ -4,7 +4,7 @@ mongoose.set('debug', true);
 
 mongoose.Promise = Promise;
 
-mongoose.connect('mongodb://localhost:27017/swag-pictures', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/swag-pictures', {
   keepAlive: true,
   useNewUrlParser: true
 })
