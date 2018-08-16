@@ -1,22 +1,25 @@
-const db = require('../../models');
+const db = require("../../models");
 
-// /api/users/:id/picture
-exports.createPicture = async function (req, res, next) {
+exports.handleFollowUser = async function(req, res, next) {
   try {
-    let message = await db.Message.create({
-      text: req.body.text,
-      user: req.params.id
-    });
-    let foundUser = await db.User.findById(req.params.id);
-    foundUser.messages.push(message.id);
+    const { tryingToFollowUser_id, follower_id } = req.body;
+    const foundUser = await db.User.findById(follower_id);
+    foundUser.following.push(tryingToFollowUser_id);
     await foundUser.save();
-    let foundMessage = await db.Message.findById(message.id).populate('user', {
-      username: true,
-      profileImgUrl: true
-    });
-    console.log(foundMessage);
-    return res.status(200).json(foundMessage);
-  } catch (err) {
-    return next(err);
+    const foundFollowingUser = await db.User.findById(tryingToFollowUser_id);
+    const { _id, username, profileImgUrl, pictures } = foundFollowingUser;
+    return res.status(200).json({ _id, username, profileImgUrl, pictures });
+  } catch (e) {
+    return next(e);
+  }
+};
+
+exports.handlePictureDelete = async function(req, res, next) {
+  try {
+    let foundPicture = await db.Picture.findById(req.params.id);
+    await foundPicture.remove();
+    res.status(200).json();
+  } catch (e) {
+    return next(e);
   }
 };
