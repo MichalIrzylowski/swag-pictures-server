@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const db = require("../../models");
 
 exports.handleFollowUser = async function(req, res, next) {

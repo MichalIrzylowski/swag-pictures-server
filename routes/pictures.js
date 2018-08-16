@@ -2,7 +2,12 @@ const express = require("express");
 const multer = require("multer");
 const mongoose = require("mongoose");
 const db = require("../models");
-const { handleFollowUser } = require("./handlers/pictures");
+const {
+  handleFollowUser,
+  handlePicturesFind,
+  handleUserSearch,
+  handlePictureDelete
+} = require("./handlers/pictures");
 
 // === MULTER CONFIGURATION === //
 const storage = multer.diskStorage({
@@ -27,6 +32,33 @@ cloudinary.config({
 });
 
 const router = express.Router();
+
+router.post("/createComment", async function(req, res, next) {
+  try {
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// === ADD COMMENT FLOW === //
+router.post("/addComment", async function(req, res, next) {
+  try {
+    let comment = await db.Comment.create({
+      text: req.body.comment,
+      author: req.body.userId,
+      commentTo: req.body.pictureId
+    });
+    let foundPicture = await db.Picture.findById(comment.commentTo);
+    foundPicture.comments.push(comment.id);
+    await foundPicture.save();
+    let foundUser = await db.User.findById(comment.author);
+    foundUser.comments.push(comment.id);
+    await foundUser.save();
+    return res.status(200).json(comment);
+  } catch (error) {
+    return next(error);
+  }
+});
 
 // === FIND FOLLOWERS PICTURES === //
 router.post("/getPictures", handlePicturesFind);
