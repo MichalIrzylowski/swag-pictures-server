@@ -11,7 +11,6 @@ const storage = multer.diskStorage({
   }
 });
 const imageFilter = function(req, file, cb) {
-  // accept image files only
   if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
     return cb(new Error("Only image files are allowed!"), false);
   }
@@ -30,20 +29,7 @@ cloudinary.config({
 const router = express.Router();
 
 // === FIND FOLLOWERS PICTURES === //
-router.post("/getPictures", async function(req, res, next) {
-  try {
-    let picturesIds = req.body.map(p => new mongoose.Types.ObjectId(p));
-    let pictures = await db.Picture.find({ _id: { $in: picturesIds } })
-      .sort({ createdAt: "desc" })
-      .populate("author", {
-        username: true,
-        profileImgUrl: true
-      });
-    return res.status(200).json(pictures);
-  } catch (e) {
-    return next(e);
-  }
-});
+router.post("/getPictures", handlePicturesFind);
 
 // === SEARCH USERS === //
 router.post("/search_users", handleUserSearch);

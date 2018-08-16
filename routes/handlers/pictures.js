@@ -32,3 +32,18 @@ exports.handleUserSearch = async function(req, res, next) {
     return next(e);
   }
 };
+
+exports.handlePicturesFind = async function(req, res, next) {
+  try {
+    let picturesIds = req.body.map(p => new mongoose.Types.ObjectId(p));
+    let pictures = await db.Picture.find({ _id: { $in: picturesIds } })
+      .sort({ createdAt: "desc" })
+      .populate("author", {
+        username: true,
+        profileImgUrl: true
+      });
+    return res.status(200).json(pictures);
+  } catch (e) {
+    return next(e);
+  }
+};
