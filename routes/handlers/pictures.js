@@ -23,3 +23,12 @@ exports.handlePictureDelete = async function(req, res, next) {
     return next(e);
   }
 };
+
+exports.handleUserSearch = async function(req, res, next) {
+  try {
+    const foundUsers = await db.User.find({ username: req.body.username });
+    return res.status(200).json(foundUsers);
+  } catch (e) {
+    return next(e);
+  }
+};

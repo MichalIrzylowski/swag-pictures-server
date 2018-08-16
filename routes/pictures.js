@@ -46,14 +46,7 @@ router.post("/getPictures", async function(req, res, next) {
 });
 
 // === SEARCH USERS === //
-router.post("/search_users", async function(req, res, next) {
-  try {
-    const foundUsers = await db.User.find({ username: req.body.username });
-    return res.status(200).json(foundUsers);
-  } catch (e) {
-    return next(e);
-  }
-});
+router.post("/search_users", handleUserSearch);
 
 // === HANDLE FOLLOW USER === //
 router.post("/follow_user", handleFollowUser);
