@@ -5,7 +5,7 @@
   "author": "Michal Irzylowski",
   "license": "MIT",
   "scripts": {
-    "start": "node index"
+    "start": "node index.js"
   },
   "dependencies": {
     "bcrypt": "^3.0.0",
