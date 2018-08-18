@@ -48,3 +48,29 @@ exports.handlePicturesFind = async function(req, res, next) {
     return next(e);
   }
 };
+
+exports.handleAddComment = async function(req, res, next) {
+  try {
+    console.log(req.body);
+    let comment = await db.Comment.create({
+      text: req.body.comment,
+      author: req.body.authorOfACommentId,
+      commentTo: req.body.pictureId
+    });
+    let foundPicture = await db.Picture.findById(comment.commentTo);
+    foundPicture.comments.push(comment.id);
+    await foundPicture.save();
+    let foundUser = await db.User.findById(comment.author);
+    foundUser.comments.push(comment.id);
+    await foundUser.save();
+    let foundComment = await db.Comment.findById(comment.id).populate(
+      "author",
+      {
+        username: true
+      }
+    );
+    return res.status(200).json(foundComment);
+  } catch (error) {
+    return next(error);
+  }
+};

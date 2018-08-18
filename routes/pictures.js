@@ -6,7 +6,8 @@ const {
   handleFollowUser,
   handlePicturesFind,
   handleUserSearch,
-  handlePictureDelete
+  handlePictureDelete,
+  handleAddComment
 } = require("./handlers/pictures");
 
 // === MULTER CONFIGURATION === //
@@ -33,28 +34,20 @@ cloudinary.config({
 
 const router = express.Router();
 
-router.post("/createComment", async function(req, res, next) {
-  try {
-  } catch (error) {
-    return next(error);
-  }
-});
-
 // === ADD COMMENT FLOW === //
-router.post("/addComment", async function(req, res, next) {
+router.post("/addComment", handleAddComment);
+
+router.post("/find_comments", async function(req, res, next) {
   try {
-    let comment = await db.Comment.create({
-      text: req.body.comment,
-      author: req.body.userId,
-      commentTo: req.body.pictureId
-    });
-    let foundPicture = await db.Picture.findById(comment.commentTo);
-    foundPicture.comments.push(comment.id);
-    await foundPicture.save();
-    let foundUser = await db.User.findById(comment.author);
-    foundUser.comments.push(comment.id);
-    await foundUser.save();
-    return res.status(200).json(comment);
+    let commentsIds = req.body.map(c => new mongoose.Types.ObjectId(c));
+    const populateQuery = [
+      { path: "author", select: "username" },
+      { path: "commentTo", select: "_id" }
+    ];
+    let comments = await db.Comment.find({
+      _id: { $in: commentsIds }
+    }).populate(populateQuery);
+    return res.status(200).json(comments);
   } catch (error) {
     return next(error);
   }
@@ -68,6 +61,9 @@ router.post("/search_users", handleUserSearch);
 
 // === HANDLE FOLLOW USER === //
 router.post("/follow_user", handleFollowUser);
+
+// === HANDLE PICTURE DELETE === //
+router.delete("/:id", handlePictureDelete);
 
 // === HANDLE PICTURE CREATE ===//
 router.post("/:id/picture", upload.single("picture"), async function(
@@ -100,9 +96,7 @@ router.post("/:id/picture", upload.single("picture"), async function(
   });
 });
 
-// === HANDLE PICTURE DELETE === //
-router.delete("/:id", handlePictureDelete);
-
+// === HANDLE UPDATE PROFILE === //
 router.put("/:id", upload.single("picture"), async function(req, res, next) {
   if (req.file) {
     cloudinary.uploader.upload(req.file.path, async function(result) {
