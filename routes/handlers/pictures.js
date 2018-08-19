@@ -51,7 +51,6 @@ exports.handlePicturesFind = async function(req, res, next) {
 
 exports.handleAddComment = async function(req, res, next) {
   try {
-    console.log(req.body);
     let comment = await db.Comment.create({
       text: req.body.comment,
       author: req.body.authorOfACommentId,

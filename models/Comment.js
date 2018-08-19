@@ -22,7 +22,7 @@ const commentSchema = new mongoose.Schema(
 commentSchema.pre("remove", async function(next) {
   try {
     let user = await User.findById(this.author);
-    user.comments.remove(this.id);
+    user.comments.filter(c => c !== this.id);
     await user.save();
     let picture = await Picture.findById(this.commentTo);
     picture.comments.remove(this.id);

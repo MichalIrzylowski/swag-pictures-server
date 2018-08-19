@@ -37,6 +37,7 @@ const router = express.Router();
 // === ADD COMMENT FLOW === //
 router.post("/addComment", handleAddComment);
 
+// === FIND COMMENTS FLOW === //
 router.post("/find_comments", async function(req, res, next) {
   try {
     let commentsIds = req.body.map(c => new mongoose.Types.ObjectId(c));
@@ -48,6 +49,17 @@ router.post("/find_comments", async function(req, res, next) {
       _id: { $in: commentsIds }
     }).populate(populateQuery);
     return res.status(200).json(comments);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// === DELETE COMMENT FLOW === //
+router.delete("/delete_comment/:id", async function(req, res, next) {
+  try {
+    let commentToDelete = await db.Comment.findById(req.params.id);
+    await commentToDelete.remove();
+    return res.status(200).json();
   } catch (error) {
     return next(error);
   }
